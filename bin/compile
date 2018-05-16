@@ -5,67 +5,56 @@
 set -e
 
 # parse params
-BUILD_DIR=$1
-CACHE_DIR=$2
-ENV_DIR=$3
+build_dir=$1
+cache_dir=$2
+env_dir=$3
 
+opencv_version="2.4.13"
 pack=$(dirname $0)
 if [ ! "${pack:0:1}" == "/" ]
 then
   base=$(pwd)
   pack="${base}/${pack}"
 fi
-opencv_version="2.4.13"
 opencv_path="${pack}/../vendor/opencv-linux-amd64-${opencv_version}.tar.gz"
 
-VENDORED_OPENCV="/app/vendor/opencv"
-OPENCV_CACHE="$CACHE_DIR/opencv"
+vendored_opencv="/app/vendor/opencv"
+cached_opencv="$cache_dir/opencv"
 
 if [ -d "$OPENCV_CACHE" ]; then
   echo "-----> Reusing cached OpenCV"
-  cp -a $OPENCV_CACHE $VENDORED_OPENCV
+  cp -a $cached_opencv $vendored_opencv
 else
   echo "-----> Copying and extracting OpenCV"
   echo "Extracting [$opencv_path] to [$VENDORED_OPENCV]"
-  mkdir -p $VENDORED_OPENCV
-  tar xzf ${opencv_path} -C $VENDORED_OPENCV
+  mkdir -p $vendored_opencv
+  tar xzf ${opencv_path} -C $vendored_opencv
 
-  # copy to cache
-  mkdir -p $CACHE_DIR
-  cp -a $VENDORED_OPENCV $OPENCV_CACHE
+  mkdir -p $cache_dir # in case it doesn't exist yet
+  cp -a $vendored_opencv $cached_opencv
 fi
 
 # vendor
 echo "-----> Vendoring OpenCV shared objects into slug"
-VENDORED_SO="$BUILD_DIR/vendor/opencv"
-mkdir -p $VENDORED_SO
-cp -a "$VENDORED_OPENCV/." $VENDORED_SO
+vendored_slug="$BUILD_DIR/vendor/opencv"
+mkdir -p $vendored_slug
+cp -a "$vendored_opencv/." $vendored_slug
 
 # LD_LIBRARY_PATH=${target}/lib:$LD_LIBRARY_PATH
 
 # BUNDLE_ is the env prefix for bundler configs
 # see https://bundler.io/v1.16/bundle_config.html for more
-opencv_env=${ENV_DIR}/BUNDLE_BUILD__RUBY-OPENCV
+opencv_env=${env_dir}/BUNDLE_BUILD__RUBY-OPENCV
 if [ ! -f ${opencv_env} ]; then
     echo "--with-opencv-dir=${VENDORED_SO}/" > ${opencv_env}
 fi
 
-echo "hello" > "${ENV_DIR}/hello_test_file"
-
-# more debugging
-ls -la ${VENDORED_SO}/*
-ls -la /app/
-
-echo "*** OpenCV installation finished ***"
-
-echo "export PATH=\"$VENODRED_SO/bin:$PATH\"" > $BUILD_DIR/export
-echo "export LD_LIBRARY_PATH=\"$VENODRED_SO/lib:$LD_LIBRARY_PATH\"" >> $BUILD_DIR/export
-
-# cat <<EOF > export
-# export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
-# EOF
+# echo "export PATH=\"$VENODRED_SO/bin:$PATH\"" > $BUILD_DIR/export
+# echo "export LD_LIBRARY_PATH=\"$VENODRED_SO/lib:$LD_LIBRARY_PATH\"" >> $BUILD_DIR/export
 
 # runtime
-mkdir -p "$BUILD_DIR/.profile.d"
-echo "export LD_LIBRARY_PATH=\"$VENODRED_SO/lib:$LD_LIBRARY_PATH\"" >> $BUILD_DIR/.profile.d/opencv.sh
-echo "export LD_LIBRARY_PATH=\"/app/vendor/opencv/lib:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/opencv.sh
+mkdir -p "$build_dir/.profile.d"
+echo "export LD_LIBRARY_PATH=\"$VENDORED_SO/lib:$LD_LIBRARY_PATH\"" > $build_dir/.profile.d/opencv.sh
+# echo "export LD_LIBRARY_PATH=\"/app/vendor/opencv/lib:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/opencv.sh
+
+echo "*** OpenCV installation finished ***"
