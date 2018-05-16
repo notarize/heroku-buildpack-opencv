@@ -21,7 +21,7 @@ opencv_path="${pack}/../vendor/opencv-linux-amd64-${opencv_version}.tar.gz"
 vendored_opencv="$build_dir/vendor/opencv"
 cached_opencv="$cache_dir/opencv"
 
-mkdir -p $vendored_slug
+mkdir -p $vendored_opencv
 
 if [ -d "$cached_opencv" ]; then
   echo "-----> Reusing cached OpenCV"
