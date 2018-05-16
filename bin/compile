@@ -4,7 +4,7 @@
 # fail fast
 set -e
 
-# parse params
+# see params https://devcenter.heroku.com/articles/buildpack-api#bin-compile-usage
 build_dir=$1
 cache_dir=$2
 env_dir=$3
@@ -18,45 +18,42 @@ then
 fi
 opencv_path="${pack}/../vendor/opencv-linux-amd64-${opencv_version}.tar.gz"
 
-# vendored_opencv="/app/vendor/opencv"
-vendored_slug="$build_dir/vendor/opencv"
+vendored_opencv="$build_dir/vendor/opencv"
 cached_opencv="$cache_dir/opencv"
 
 mkdir -p $vendored_slug
 
 if [ -d "$cached_opencv" ]; then
   echo "-----> Reusing cached OpenCV"
-  # cp -a $cached_opencv $vendored_opencv
-  cp -a $cached_opencv $vendored_slug
+  cp -a $cached_opencv $vendored_opencv
 else
   echo "-----> Copying and extracting OpenCV"
-  echo "Extracting [$opencv_path] to [$vendored_slug]"
-  # mkdir -p $vendored_opencv
-  # tar xzf ${opencv_path} -C $vendored_opencv
-  tar xzf ${opencv_path} -C $vendored_slug
+  echo "-----> Extracting [$opencv_path] to [$vendored_opencv]"
+  tar xzf $opencv_path -C $vendored_opencv
 
-  mkdir -p $cache_dir # in case it doesn't exist yet
-  # cp -a $vendored_opencv $cached_opencv
-  cp -a $vendored_slug $cached_opencv
+  mkdir -p $cache_dir
+  cp -a $vendored_opencv $cached_opencv
 fi
 
-# vendor
-echo "-----> Vendoring OpenCV shared objects into slug"
-# mkdir -p $vendored_slug
-# cp -a "$vendored_opencv/." $vendored_slug
-
+echo "-----> Updating ruby bundler configs"
 # BUNDLE_ is the env prefix for bundler configs
 # see https://bundler.io/v1.16/bundle_config.html for more
 opencv_env=${env_dir}/BUNDLE_BUILD__RUBY-OPENCV
 if [ ! -f ${opencv_env} ]; then
-    # echo "--with-opencv-dir=${vendored_opencv}/" > ${opencv_env}
-    echo "--with-opencv-dir=${vendored_slug}/" > ${opencv_env}
+  echo "--with-opencv-dir=${vendored_opencv}/" > ${opencv_env}
 fi
 
-# runtime
+echo "-----> Updating LD library path for later compilation"
+# HACK: we need to update the LD path at release time, but by that point
+# the temp build dir will already have been compiled into a slug.
+# so we make some assumptions about the final release location, and hope
+# the opencv binaries will still be there too
+slugged_opencv="/app/vendor/opencv"
+mkdir -p $slugged_opencv
+cp -a $cached_opencv $slugged_opencv
+# scripts in .profile.d/ will be run at release time
+# see https://devcenter.heroku.com/articles/buildpack-api#profile-d-scripts
 mkdir -p "$build_dir/.profile.d"
-# echo "export LD_LIBRARY_PATH=\"$vendored_opencv/lib:$LD_LIBRARY_PATH\"" > $build_dir/.profile.d/opencv.sh
-echo "export LD_LIBRARY_PATH=\"$vendored_slug/lib:$LD_LIBRARY_PATH\"" > $build_dir/.profile.d/opencv.sh
-echo "ls app/*" >> $build_dir/.profile.d/opencv.sh
+echo "export LD_LIBRARY_PATH=\"$slugged_opencv/lib:$LD_LIBRARY_PATH\"" > $build_dir/.profile.d/opencv.sh
 
 echo "*** OpenCV installation finished ***"
