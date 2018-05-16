@@ -7,7 +7,7 @@ set -e
 # parse params
 BUILD_DIR=$1
 CACHE_DIR=$2
-ENV=$3
+ENV_DIR=$3
 
 pack=$(dirname $0)
 if [ ! "${pack:0:1}" == "/" ]
@@ -18,8 +18,6 @@ fi
 opencv_version="2.4.13"
 opencv_path="${pack}/../vendor/opencv-linux-amd64-${opencv_version}.tar.gz"
 
-# OPENCV_PACKAGE="https://s3-us-west-2.amazonaws.com/cdn.thegrid.io/caliper/opencv-build-0.0.1.tar.gz"
-# OPENCV_PACKAGE_ETAG=$(curl -s --head "$OPENCV_PACKAGE" | grep -Ei '^etag' | sed -r 's/^etag|[^a-zA-Z0-9]+//gi')
 VENDORED_OPENCV="/app/vendor/opencv"
 OPENCV_CACHE="$CACHE_DIR/opencv"
 
@@ -30,7 +28,6 @@ else
   echo "-----> Copying and extracting OpenCV"
   echo "Extracting [$opencv_path] to [$VENDORED_OPENCV]"
   mkdir -p $VENDORED_OPENCV
-  # curl $OPENCV_PACKAGE -s -o - | tar xzf - -C $VENDORED_OPENCV
   tar xzf ${opencv_path} -C $VENDORED_OPENCV
 
   # copy to cache
@@ -44,27 +41,27 @@ VENDORED_SO="$BUILD_DIR/vendor/opencv/lib"
 mkdir -p $VENDORED_SO
 cp -a "$VENDORED_OPENCV/lib/." $VENDORED_SO
 
-# PATH=${build_target}/bin:$PATH
+PATH=$VENDORED_OPENCV/bin:$PATH
 # LD_LIBRARY_PATH=${target}/lib:$LD_LIBRARY_PATH
 
 # BUNDLE_ is the env prefix for bundler configs
 # see https://bundler.io/v1.16/bundle_config.html for more
-opencv_env=${ENV}/BUNDLE_BUILD__RUBY-OPENCV
+opencv_env=${ENV_DIR}/BUNDLE_BUILD__RUBY-OPENCV
 if [ ! -f ${opencv_env} ]; then
     echo "--with-opencv-dir=${VENDORED_SO}/" > ${opencv_env}
 fi
 
-echo "*** CMake and OpenCV installation finished ***"
+echo "hello" > "hello_test_file"
 
-# export PKG_CONFIG_PATH="/app/vendor/opencv/lib/pkgconfig:$PKG_CONFIG_PATH"
-# export LD_LIBRARY_PATH="/app/vendor/opencv/lib:$LD_LIBRARY_PATH"
-#
+which cmake
+echo "*** OpenCV installation finished ***"
+
+export LD_LIBRARY_PATH="/app/vendor/opencv/lib:$LD_LIBRARY_PATH"
+
 # cat <<EOF > export
 # export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
-# export PKG_CONFIG_PATH="\$PKG_CONFIG_PATH:$PKG_CONFIG_PATH"
 # EOF
-#
-# # runtime
+
+# runtime
 # mkdir -p "$BUILD_DIR/.profile.d"
 # echo "export LD_LIBRARY_PATH=\"/app/vendor/opencv/lib:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/opencv.sh
-# echo "export PKG_CONFIG_PATH=\"/app/vendor/opencv/lib/pkgconfig:\$PKG_CONFIG_PATH\"" >> $BUILD_DIR/.profile.d/opencv.sh
