@@ -66,5 +66,6 @@ echo "export LD_LIBRARY_PATH=\"$VENODRED_SO/lib:$LD_LIBRARY_PATH\"" >> $BUILD_DI
 # EOF
 
 # runtime
-# mkdir -p "$BUILD_DIR/.profile.d"
-# echo "export LD_LIBRARY_PATH=\"/app/vendor/opencv/lib:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/opencv.sh
+mkdir -p "$BUILD_DIR/.profile.d"
+echo "export LD_LIBRARY_PATH=\"$VENODRED_SO/lib:$LD_LIBRARY_PATH\"" >> $BUILD_DIR/.profile.d/opencv.sh
+echo "export LD_LIBRARY_PATH=\"/app/vendor/opencv/lib:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/opencv.sh
