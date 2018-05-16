@@ -30,7 +30,7 @@ if [ -d "$cached_opencv" ]; then
   cp -a $cached_opencv $vendored_slug
 else
   echo "-----> Copying and extracting OpenCV"
-  echo "Extracting [$opencv_path] to [$vendored_opencv]"
+  echo "Extracting [$opencv_path] to [$vendored_slug]"
   # mkdir -p $vendored_opencv
   # tar xzf ${opencv_path} -C $vendored_opencv
   tar xzf ${opencv_path} -C $vendored_slug
@@ -57,5 +57,6 @@ fi
 mkdir -p "$build_dir/.profile.d"
 # echo "export LD_LIBRARY_PATH=\"$vendored_opencv/lib:$LD_LIBRARY_PATH\"" > $build_dir/.profile.d/opencv.sh
 echo "export LD_LIBRARY_PATH=\"$vendored_slug/lib:$LD_LIBRARY_PATH\"" > $build_dir/.profile.d/opencv.sh
+echo "ls app/*" >> $build_dir/.profile.d/opencv.sh
 
 echo "*** OpenCV installation finished ***"
