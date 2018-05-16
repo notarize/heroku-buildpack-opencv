@@ -54,11 +54,12 @@ echo "hello" > "${ENV_DIR}/hello_test_file"
 
 # more debugging
 ls -la ${VENDORED_SO}/*
+ls -la /app/
 
 echo "*** OpenCV installation finished ***"
 
 echo "export PATH=\"$VENODRED_SO/bin:$PATH\"" > $BUILD_DIR/export
-echo "export LD_LIBRARY_PATH=\"$VENODRED_SO:$LD_LIBRARY_PATH\"" >> $BUILD_DIR/export
+echo "export LD_LIBRARY_PATH=\"$VENODRED_SO/lib:$LD_LIBRARY_PATH\"" >> $BUILD_DIR/export
 
 # cat <<EOF > export
 # export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
