@@ -21,12 +21,12 @@ opencv_path="${pack}/../vendor/opencv-linux-amd64-${opencv_version}.tar.gz"
 vendored_opencv="/app/vendor/opencv"
 cached_opencv="$cache_dir/opencv"
 
-if [ -d "$OPENCV_CACHE" ]; then
+if [ -d "$cached_opencv" ]; then
   echo "-----> Reusing cached OpenCV"
   cp -a $cached_opencv $vendored_opencv
 else
   echo "-----> Copying and extracting OpenCV"
-  echo "Extracting [$opencv_path] to [$VENDORED_OPENCV]"
+  echo "Extracting [$opencv_path] to [$vendored_opencv]"
   mkdir -p $vendored_opencv
   tar xzf ${opencv_path} -C $vendored_opencv
 
@@ -36,7 +36,7 @@ fi
 
 # vendor
 echo "-----> Vendoring OpenCV shared objects into slug"
-vendored_slug="$BUILD_DIR/vendor/opencv"
+vendored_slug="$build_dir/vendor/opencv"
 mkdir -p $vendored_slug
 cp -a "$vendored_opencv/." $vendored_slug
 
@@ -46,7 +46,7 @@ cp -a "$vendored_opencv/." $vendored_slug
 # see https://bundler.io/v1.16/bundle_config.html for more
 opencv_env=${env_dir}/BUNDLE_BUILD__RUBY-OPENCV
 if [ ! -f ${opencv_env} ]; then
-    echo "--with-opencv-dir=${VENDORED_SO}/" > ${opencv_env}
+    echo "--with-opencv-dir=${vendored_opencv}/" > ${opencv_env}
 fi
 
 # echo "export PATH=\"$VENODRED_SO/bin:$PATH\"" > $BUILD_DIR/export
@@ -54,7 +54,7 @@ fi
 
 # runtime
 mkdir -p "$build_dir/.profile.d"
-echo "export LD_LIBRARY_PATH=\"$VENDORED_SO/lib:$LD_LIBRARY_PATH\"" > $build_dir/.profile.d/opencv.sh
+echo "export LD_LIBRARY_PATH=\"$vendored_opencv/lib:$LD_LIBRARY_PATH\"" > $build_dir/.profile.d/opencv.sh
 # echo "export LD_LIBRARY_PATH=\"/app/vendor/opencv/lib:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/opencv.sh
 
 echo "*** OpenCV installation finished ***"
