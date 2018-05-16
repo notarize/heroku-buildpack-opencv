@@ -1,12 +1,10 @@
-### Composable OpenCV heroku buildpack
+# Heroku Buildpack for OpenCV (with Ruby/Bundler Multipack Flow)
 
-Copy pasted vulcan build from Labgoo:
-https://bitbucket.org/labgoo/heroku-buildpack-nodejs-with-opencv
+This is a Notarize-flavored [Heroku Buildpack](http://devcenter.heroku.com/articles/buildpacks) for OpenCV, with an addition for the Bundler gemset manager used in the [heroku-buildpack-ruby flow](https://github.com/heroku/heroku-buildpack-ruby#flow).
 
-Also copy pasted from @rumblelabs:
-https://github.com/rumblelabs/heroku-buildpack-cairo
+Overall, this buildpack should help you use the [ruby-opencv](https://github.com/ruby-opencv/ruby-opencv) gem. If so, you should
+- be using heroku multipacks
+- use a CMake buildpack at some point, or modify this buildpack to also install CMake
+- use a ruby/rails/bundler buildpack **_after_** this buildpack at some point
 
-Should at least work with `heroku-buildpack-nodejs` + the `after_compile` fork of `heroku-buildpack-multi` by salsify:
-https://github.com/salsify/heroku-buildpack-multi
-
-Have fun!
+If you'd like to use OpenCV for other purposes, you should fork this buildpack and export any other path variables needed for other libraries to access OpenCV.

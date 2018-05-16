@@ -35,6 +35,7 @@ else
   cp -a $vendored_opencv $cached_opencv
 fi
 
+# You can remove this block if you don't need it
 echo "-----> Updating ruby bundler configs"
 # BUNDLE_ is the env prefix for bundler configs
 # see https://bundler.io/v1.16/bundle_config.html for more
