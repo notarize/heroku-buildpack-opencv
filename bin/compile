@@ -37,11 +37,10 @@ fi
 
 # vendor
 echo "-----> Vendoring OpenCV shared objects into slug"
-VENDORED_SO="$BUILD_DIR/vendor/opencv/lib"
+VENDORED_SO="$BUILD_DIR/vendor/opencv"
 mkdir -p $VENDORED_SO
-cp -a "$VENDORED_OPENCV/lib/." $VENDORED_SO
+cp -a "$VENDORED_OPENCV/." $VENDORED_SO
 
-PATH=$VENDORED_OPENCV/bin:$PATH
 # LD_LIBRARY_PATH=${target}/lib:$LD_LIBRARY_PATH
 
 # BUNDLE_ is the env prefix for bundler configs
@@ -54,12 +53,12 @@ fi
 echo "hello" > "${ENV_DIR}/hello_test_file"
 
 # more debugging
-ls -la ${BUILD_DIR}/*
-ls -la "app"/*
+ls -la ${VENDORED_SO}/*
 
 echo "*** OpenCV installation finished ***"
 
-export LD_LIBRARY_PATH="/app/vendor/opencv/lib:$LD_LIBRARY_PATH"
+echo "export PATH=\"$VENODRED_SO/bin:$PATH\"" > $BUILD_DIR/export
+echo "export LD_LIBRARY_PATH=\"$VENODRED_SO:$LD_LIBRARY_PATH\"" >> $BUILD_DIR/export
 
 # cat <<EOF > export
 # export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
