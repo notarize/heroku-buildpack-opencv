@@ -51,9 +51,12 @@ if [ ! -f ${opencv_env} ]; then
     echo "--with-opencv-dir=${VENDORED_SO}/" > ${opencv_env}
 fi
 
-echo "hello" > "hello_test_file"
+echo "hello" > "${ENV_DIR}/hello_test_file"
 
-which cmake
+# more debugging
+ls -la ${BUILD_DIR}/*
+ls -la "app"/*
+
 echo "*** OpenCV installation finished ***"
 
 export LD_LIBRARY_PATH="/app/vendor/opencv/lib:$LD_LIBRARY_PATH"
