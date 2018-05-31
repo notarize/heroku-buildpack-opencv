@@ -57,7 +57,9 @@ echo "-----> Updating LD library path for later compilation"
 # the opencv binaries will still be there too
 slugged_opencv="/app/vendor/opencv"
 mkdir -p $slugged_opencv
-cp -a $cached_opencv $slugged_opencv
+
+cp -a $vendored_opencv $slugged_opencv
+
 # scripts in .profile.d/ will be run at release time
 # see https://devcenter.heroku.com/articles/buildpack-api#profile-d-scripts
 mkdir -p "$build_dir/.profile.d"
