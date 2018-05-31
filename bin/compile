@@ -19,21 +19,27 @@ fi
 opencv_path="${pack}/../vendor/opencv-linux-amd64-${opencv_version}.tar.gz"
 
 vendored_opencv="$build_dir/vendor/opencv"
-cached_opencv="$cache_dir/opencv"
+# caching is causing issues on heroku for unknown reasons
+# doesn't have substantial time save, so just not doing it
+# cached_opencv="$cache_dir/opencv"
 
 mkdir -p $vendored_opencv
 
-if [ -d "$cached_opencv" ]; then
-  echo "-----> Reusing cached OpenCV"
-  cp -a $cached_opencv $vendored_opencv
-else
-  echo "-----> Copying and extracting OpenCV"
-  echo "-----> Extracting [$opencv_path] to [$vendored_opencv]"
-  tar xzf $opencv_path -C $vendored_opencv
+echo "-----> Copying and extracting OpenCV"
+echo "-----> Extracting [$opencv_path] to [$vendored_opencv]"
+tar xzf $opencv_path -C $vendored_opencv
 
-  mkdir -p $cache_dir
-  cp -a $vendored_opencv $cached_opencv
-fi
+# if [ -d "$cached_opencv" ]; then
+#   echo "-----> Reusing cached OpenCV"
+#   cp -a $cached_opencv $vendored_opencv
+# else
+#   echo "-----> Copying and extracting OpenCV"
+#   echo "-----> Extracting [$opencv_path] to [$vendored_opencv]"
+#   tar xzf $opencv_path -C $vendored_opencv
+
+#   mkdir -p $cache_dir
+#   cp -a $vendored_opencv $cached_opencv
+# fi
 
 # You can remove this block if you don't need it
 echo "-----> Updating ruby bundler configs"
