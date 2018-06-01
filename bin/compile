@@ -7,6 +7,7 @@ set -e
 # parse params
 BUILD_DIR=$1
 CACHE_DIR=$2 # unused
+ENV_DIR=$3
 
 # determine opencv package location
 OPENCV_VERSION="2.4.13"
@@ -28,6 +29,15 @@ OPENCV_VENDOR_SO_DIR="${BUILD_DIR}/vendor/opencv/lib"
 mkdir -p "${OPENCV_VENDOR_SO_DIR}"
 echo "-----> Copying OpenCV shared objects to (${OPENCV_VENDOR_SO_DIR})"
 cp -a "${OPENCV_VENDOR_DIR}/lib/." $OPENCV_VENDOR_SO_DIR
+
+# add OpenCV to bundler env
+# BUNDLE_ is the env prefix for bundler configs
+# see https://bundler.io/v1.16/bundle_config.html for more
+OPENCV_BUNDLE_ENV="${ENV_DIR}/BUNDLE_BUILD__RUBY-OPENCV"
+if [ ! -f ${OPENCV_BUNDLE_ENV} ]; then
+  echo "-----> Adding with OpenCV dir flag (${OPENCV_VENDOR_DIR}/) to (${OPENCV_BUNDLE_ENV})"
+  echo "--with-opencv-dir=${OPENCV_VENDOR_DIR}/" > ${OPENCV_BUNDLE_ENV}
+fi
 
 # add runtime scripts to .profile.d folder
 mkdir -p "${BUILD_DIR}/.profile.d"
