@@ -19,7 +19,7 @@ echo "-----> Using OpenCV package at (${OPENCV_PACKAGE})"
 
 # extract package into app vendor
 OPENCV_VENDOR_DIR="/app/vendor/opencv"
-mkdir -p "${VENDORED_OPENCV}"
+mkdir -p "${OPENCV_VENDOR_DIR}"
 echo "-----> Extracting OpenCV package to (${OPENCV_VENDOR_DIR})"
 tar xzf $OPENCV_PACKAGE -C $OPENCV_VENDOR_DIR
 
