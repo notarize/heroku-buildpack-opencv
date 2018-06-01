@@ -4,65 +4,36 @@
 # fail fast
 set -e
 
-# see params https://devcenter.heroku.com/articles/buildpack-api#bin-compile-usage
-build_dir=$1
-cache_dir=$2
-env_dir=$3
+# parse params
+BUILD_DIR=$1
+CACHE_DIR=$2 # unused
 
-opencv_version="2.4.13"
-pack=$(dirname $0)
-if [ ! "${pack:0:1}" == "/" ]
-then
-  base=$(pwd)
-  pack="${base}/${pack}"
+# determine opencv package location
+OPENCV_VERSION="2.4.13"
+PACK=$(dirname $0)
+if [ ! "${PACK:0:1}" == "/" ]; then # $HOME dirname $0 is .
+  PACK="$(pwd)/${PACK}"
 fi
-opencv_path="${pack}/../vendor/opencv-linux-amd64-${opencv_version}.tar.gz"
+OPENCV_PACKAGE="${PACK}/../vendor/opencv-linux-amd64-${OPENCV_VERSION}.tar.gz"
+echo "-----> Using OpenCV package at (${OPENCV_PACKAGE})"
 
-vendored_opencv="$build_dir/vendor/opencv"
-# caching is causing issues on heroku for unknown reasons
-# doesn't have substantial time save, so just not doing it
-# cached_opencv="$cache_dir/opencv"
+# extract package into app vendor
+OPENCV_VENDOR_DIR="/app/vendor/opencv"
+mkdir -p $VENDORED_OPENCV
+echo "-----> Extracting OpenCV package to (${OPENCV_VENDOR_DIR})"
+tar xzf $OPENCV_PACKAGE -C $OPENCV_VENDOR_DIR
 
-mkdir -p $vendored_opencv
+# copy shared objects into slug
+OPENCV_VENDOR_SO_DIR="${BUILD_DIR}/vendor/opencv/lib"
+mkdir -p $OPENCV_VENDOR_SO_DIR
+echo "-----> Copying OpenCV shared objects to (${OPENCV_VENDOR_SO_DIR})"
+cp -a "${OPENCV_VENDOR_DIR}/lib/." $OPENCV_VENDOR_SO_DIR
 
-echo "-----> Copying and extracting OpenCV"
-echo "-----> Extracting [$opencv_path] to [$vendored_opencv]"
-tar xzf $opencv_path -C $vendored_opencv
-
-# if [ -d "$cached_opencv" ]; then
-#   echo "-----> Reusing cached OpenCV"
-#   cp -a $cached_opencv $vendored_opencv
-# else
-#   echo "-----> Copying and extracting OpenCV"
-#   echo "-----> Extracting [$opencv_path] to [$vendored_opencv]"
-#   tar xzf $opencv_path -C $vendored_opencv
-
-#   mkdir -p $cache_dir
-#   cp -a $vendored_opencv $cached_opencv
-# fi
-
-# You can remove this block if you don't need it
-echo "-----> Updating ruby bundler configs"
-# BUNDLE_ is the env prefix for bundler configs
-# see https://bundler.io/v1.16/bundle_config.html for more
-opencv_env=${env_dir}/BUNDLE_BUILD__RUBY-OPENCV
-if [ ! -f ${opencv_env} ]; then
-  echo "--with-opencv-dir=${vendored_opencv}/" > ${opencv_env}
-fi
-
-echo "-----> Updating LD library path for later compilation"
-# HACK: we need to update the LD path at release time, but by that point
-# the temp build dir will already have been compiled into a slug.
-# so we make some assumptions about the final release location, and hope
-# the opencv binaries will still be there too
-slugged_opencv="/app/vendor/opencv"
-mkdir -p $slugged_opencv
-
-cp -a $vendored_opencv $slugged_opencv
-
-# scripts in .profile.d/ will be run at release time
-# see https://devcenter.heroku.com/articles/buildpack-api#profile-d-scripts
-mkdir -p "$build_dir/.profile.d"
-echo "export LD_LIBRARY_PATH=\"$slugged_opencv/lib:$LD_LIBRARY_PATH\"" > $build_dir/.profile.d/opencv.sh
+# add runtime scripts to .profile.d folder
+mkdir -p "${BUILD_DIR}/.profile.d"
+echo "-----> Add OpenCV to LD_LIBRARY_PATH (${HOME}/vendor/opencv/lib)"
+echo "export LD_LIBRARY_PATH=\"\$HOME/vendor/opencv/lib:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/opencv.sh
+echo "-----> Add OpenCV to PKG_CONFIG_PATH (${HOME}/vendor/opencv/lib/pkgconfig)"
+echo "export PKG_CONFIG_PATH=\"\$HOME/vendor/opencv/lib/pkgconfig:\$PKG_CONFIG_PATH\"" >> $BUILD_DIR/.profile.d/opencv.sh
 
 echo "*** OpenCV installation finished ***"
