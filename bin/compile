@@ -19,13 +19,13 @@ echo "-----> Using OpenCV package at (${OPENCV_PACKAGE})"
 
 # extract package into app vendor
 OPENCV_VENDOR_DIR="/app/vendor/opencv"
-mkdir -p $VENDORED_OPENCV
+mkdir -p "${VENDORED_OPENCV}"
 echo "-----> Extracting OpenCV package to (${OPENCV_VENDOR_DIR})"
 tar xzf $OPENCV_PACKAGE -C $OPENCV_VENDOR_DIR
 
 # copy shared objects into slug
 OPENCV_VENDOR_SO_DIR="${BUILD_DIR}/vendor/opencv/lib"
-mkdir -p $OPENCV_VENDOR_SO_DIR
+mkdir -p "${OPENCV_VENDOR_SO_DIR}"
 echo "-----> Copying OpenCV shared objects to (${OPENCV_VENDOR_SO_DIR})"
 cp -a "${OPENCV_VENDOR_DIR}/lib/." $OPENCV_VENDOR_SO_DIR
 
